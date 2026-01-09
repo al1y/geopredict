@@ -1,31 +1,20 @@
 'use client'
 
 import { usePrivy } from '@privy-io/react-auth'
+import { useContext, createContext } from 'react'
 
-const PRIVY_ENABLED = typeof window !== 'undefined' &&
-  process.env.NEXT_PUBLIC_PRIVY_APP_ID &&
-  process.env.NEXT_PUBLIC_PRIVY_APP_ID !== 'your-privy-app-id-here'
+// Check if Privy is properly configured
+const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID
+const PRIVY_ENABLED = PRIVY_APP_ID && PRIVY_APP_ID !== 'your-privy-app-id-here'
 
-// Fallback hook when Privy isn't configured
-function useNoAuth() {
-  return {
-    ready: true,
-    authenticated: false,
-    login: () => console.warn('Privy not configured. Set NEXT_PUBLIC_PRIVY_APP_ID in .env.local'),
-    logout: () => {},
-    user: null,
-  }
-}
+// Context to check if we're inside PrivyProvider
+export const PrivyEnabledContext = createContext(false)
 
 export function useAuth() {
-  // We have to call both hooks unconditionally due to React rules
-  // But we can choose which result to return
-  const privyResult = usePrivyOrFallback()
-  return privyResult
-}
+  const privyEnabled = useContext(PrivyEnabledContext)
 
-function usePrivyOrFallback() {
-  try {
+  // Only call usePrivy if we're inside a real PrivyProvider
+  if (privyEnabled) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const privy = usePrivy()
     return {
@@ -35,14 +24,14 @@ function usePrivyOrFallback() {
       logout: privy.logout,
       user: privy.user,
     }
-  } catch {
-    // Privy provider not available, return fallback
-    return {
-      ready: true,
-      authenticated: false,
-      login: () => console.warn('Privy not configured'),
-      logout: () => {},
-      user: null,
-    }
+  }
+
+  // Fallback when Privy isn't configured
+  return {
+    ready: true,
+    authenticated: false,
+    login: () => console.warn('Privy not configured. Set NEXT_PUBLIC_PRIVY_APP_ID in .env.local'),
+    logout: () => {},
+    user: null,
   }
 }
