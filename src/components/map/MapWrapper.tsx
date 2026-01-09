@@ -14,9 +14,20 @@ const Map = dynamic(() => import('./Map').then((mod) => mod.Map), {
 
 interface MapWrapperProps {
   markets: MarketWithOdds[]
-  onMarketSelect: (market: MarketWithOdds) => void
+  selectedMarket: MarketWithOdds | null
+  onMarketSelect: (market: MarketWithOdds | null) => void
+  userBalance: number
+  onBetPlaced: () => void
 }
 
-export function MapWrapper({ markets, onMarketSelect }: MapWrapperProps) {
-  return <Map markets={markets} onMarketSelect={onMarketSelect} />
+export function MapWrapper({ markets, selectedMarket, onMarketSelect, userBalance, onBetPlaced }: MapWrapperProps) {
+  return (
+    <Map
+      markets={markets}
+      selectedMarket={selectedMarket}
+      onMarketSelect={onMarketSelect}
+      userBalance={userBalance}
+      onBetPlaced={onBetPlaced}
+    />
+  )
 }

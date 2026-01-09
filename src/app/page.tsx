@@ -3,15 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/lib/useAuth'
 import { MapWrapper } from '@/components/map/MapWrapper'
-import { MarketPanel } from '@/components/market/MarketPanel'
 import type { MarketWithOdds } from '@/types'
 
 export default function Home() {
-  const { ready, authenticated, login, logout, user } = useAuth()
+  const { ready, authenticated, login, logout } = useAuth()
   const [markets, setMarkets] = useState<MarketWithOdds[]>([])
   const [selectedMarket, setSelectedMarket] = useState<MarketWithOdds | null>(null)
   const [userBalance, setUserBalance] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
 
   const fetchMarkets = useCallback(async () => {
     try {
@@ -39,12 +37,14 @@ export default function Home() {
   }, [authenticated])
 
   useEffect(() => {
-    fetchMarkets().finally(() => setIsLoading(false))
+    fetchMarkets()
   }, [fetchMarkets])
 
   useEffect(() => {
     if (authenticated) {
       fetchUserBalance()
+    } else {
+      setUserBalance(0)
     }
   }, [authenticated, fetchUserBalance])
 
@@ -65,9 +65,9 @@ export default function Home() {
   return (
     <main className="relative w-full h-screen overflow-hidden">
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-40 p-4 flex items-center justify-between">
+      <header className="absolute top-0 left-0 right-0 z-40 p-4 flex items-center justify-between pointer-events-none">
         <h1 className="text-xl font-bold text-white drop-shadow-lg">GeoPredict</h1>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 pointer-events-auto">
           {authenticated && (
             <div className="bg-gray-900/80 backdrop-blur px-3 py-1.5 rounded-lg text-white text-sm">
               {userBalance} credits
@@ -94,18 +94,11 @@ export default function Home() {
       {/* Map */}
       <MapWrapper
         markets={markets}
-        onMarketSelect={(market) => setSelectedMarket(market)}
+        selectedMarket={selectedMarket}
+        onMarketSelect={setSelectedMarket}
+        userBalance={userBalance}
+        onBetPlaced={handleBetPlaced}
       />
-
-      {/* Market Panel */}
-      {selectedMarket && (
-        <MarketPanel
-          market={selectedMarket}
-          onClose={() => setSelectedMarket(null)}
-          userBalance={userBalance}
-          onBetPlaced={handleBetPlaced}
-        />
-      )}
     </main>
   )
 }
