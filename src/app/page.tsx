@@ -56,8 +56,8 @@ export default function Home() {
 
   if (!ready) {
     return (
-      <div className="w-full h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="w-full h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-white/60 text-lg tracking-wide">Loading...</div>
       </div>
     )
   }
@@ -66,24 +66,31 @@ export default function Home() {
     <main className="relative w-full h-screen overflow-hidden">
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-40 p-4 flex items-center justify-between pointer-events-none">
-        <h1 className="text-xl font-bold text-white drop-shadow-lg">GeoPredict</h1>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+            <span className="text-white font-bold text-sm">G</span>
+          </div>
+          <h1 className="text-xl font-semibold text-white tracking-tight">
+            Geo<span className="text-blue-400">Predict</span>
+          </h1>
+        </div>
         <div className="flex items-center gap-3 pointer-events-auto">
           {authenticated && (
-            <div className="bg-gray-900/80 backdrop-blur px-3 py-1.5 rounded-lg text-white text-sm">
-              {userBalance} credits
+            <div className="glass-dark px-4 py-2 rounded-xl text-white/90 text-sm font-medium">
+              <span className="text-blue-400">{userBalance}</span> credits
             </div>
           )}
           {authenticated ? (
             <button
               onClick={logout}
-              className="bg-gray-900/80 backdrop-blur hover:bg-gray-800 px-4 py-2 rounded-lg text-white text-sm transition-colors"
+              className="btn-glass px-4 py-2 rounded-xl text-white/90 text-sm font-medium"
             >
               Logout
             </button>
           ) : (
             <button
               onClick={login}
-              className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors"
+              className="btn-primary-glass px-5 py-2 rounded-xl text-white text-sm font-semibold"
             >
               Login
             </button>

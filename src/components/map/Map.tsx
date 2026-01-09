@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import MapGL, { Marker, Popup, NavigationControl, GeolocateControl } from 'react-map-gl'
+import MapGL, { Marker, Popup } from 'react-map-gl'
 import type { ViewStateChangeEvent } from 'react-map-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import type { MarketWithOdds } from '@/types'
@@ -36,8 +36,6 @@ export function Map({ markets, selectedMarket, onMarketSelect, userBalance, onBe
       mapboxAccessToken={MAPBOX_TOKEN}
       onClick={() => onMarketSelect(null)}
     >
-      {/* Navigation controls hidden for cleaner UI */}
-
       {markets.map((market) => (
         <Marker
           key={market.id}
@@ -49,18 +47,28 @@ export function Map({ markets, selectedMarket, onMarketSelect, userBalance, onBe
             onMarketSelect(market)
           }}
         >
-          <div
-            className="cursor-pointer transition-transform hover:scale-110"
-            title={market.title}
-          >
+          <div className="cursor-pointer transition-all duration-200 hover:scale-110">
             <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 ${
-                selectedMarket?.id === market.id ? 'bg-blue-400 border-blue-300 scale-125' : 'bg-blue-500 border-white'
-              }`}>
+              <div
+                className={`
+                  w-10 h-10 rounded-2xl flex items-center justify-center
+                  text-white text-xs font-bold shadow-lg
+                  transition-all duration-200
+                  ${selectedMarket?.id === market.id
+                    ? 'bg-gradient-to-br from-blue-400 to-purple-500 scale-110 marker-glow'
+                    : 'bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500'
+                  }
+                `}
+                style={{
+                  boxShadow: selectedMarket?.id === market.id
+                    ? '0 0 30px rgba(96, 165, 250, 0.6), 0 4px 15px rgba(0,0,0,0.3)'
+                    : '0 4px 15px rgba(0,0,0,0.3)',
+                }}
+              >
                 {Math.round(market.yesOdds * 100)}%
               </div>
-              {viewState.zoom > 4 && (
-                <div className="mt-1 px-2 py-1 bg-gray-900/90 rounded text-xs text-white max-w-[120px] truncate">
+              {viewState.zoom > 3.5 && (
+                <div className="mt-2 px-3 py-1.5 glass-dark rounded-lg text-xs text-white/90 max-w-[140px] truncate font-medium">
                   {market.title}
                 </div>
               )}
@@ -74,12 +82,11 @@ export function Map({ markets, selectedMarket, onMarketSelect, userBalance, onBe
           longitude={selectedMarket.longitude}
           latitude={selectedMarket.latitude}
           anchor="left"
-          offset={20}
+          offset={25}
           closeButton={true}
           closeOnClick={false}
           onClose={() => onMarketSelect(null)}
-          className="market-popup"
-          maxWidth="320px"
+          maxWidth="340px"
         >
           <MarketPopup
             market={selectedMarket}
@@ -125,43 +132,57 @@ function MarketPopup({
   }
 
   return (
-    <div className="p-1 min-w-[280px]">
-      <div className="text-xs text-gray-500 mb-1">{market.locationName}</div>
-      <h3 className="font-semibold text-sm text-gray-900 mb-2 leading-tight">{market.title}</h3>
-
-      <div className="flex gap-2 mb-3">
-        <div className="flex-1 bg-green-100 rounded p-2 text-center">
-          <div className="text-lg font-bold text-green-600">{Math.round(market.yesOdds * 100)}%</div>
-          <div className="text-xs text-green-700">Yes</div>
-        </div>
-        <div className="flex-1 bg-red-100 rounded p-2 text-center">
-          <div className="text-lg font-bold text-red-600">{Math.round(market.noOdds * 100)}%</div>
-          <div className="text-xs text-red-700">No</div>
-        </div>
+    <div className="p-4 min-w-[300px]">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-400"></div>
+        <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+          {market.locationName}
+        </span>
       </div>
 
-      <p className="text-xs text-gray-600 mb-3 line-clamp-2">{market.description}</p>
+      <h3 className="font-semibold text-slate-800 mb-4 leading-snug text-[15px]">
+        {market.title}
+      </h3>
+
+      <div className="flex gap-3 mb-4">
+        <button
+          onClick={() => setPosition('yes')}
+          className={`flex-1 rounded-xl p-3 text-center transition-all duration-200 ${
+            position === 'yes'
+              ? 'bg-gradient-to-br from-emerald-400 to-emerald-500 text-white shadow-lg shadow-emerald-200'
+              : 'bg-emerald-50 hover:bg-emerald-100'
+          }`}
+        >
+          <div className={`text-2xl font-bold ${position === 'yes' ? 'text-white' : 'text-emerald-600'}`}>
+            {Math.round(market.yesOdds * 100)}%
+          </div>
+          <div className={`text-xs font-semibold ${position === 'yes' ? 'text-emerald-100' : 'text-emerald-600'}`}>
+            Yes
+          </div>
+        </button>
+        <button
+          onClick={() => setPosition('no')}
+          className={`flex-1 rounded-xl p-3 text-center transition-all duration-200 ${
+            position === 'no'
+              ? 'bg-gradient-to-br from-rose-400 to-rose-500 text-white shadow-lg shadow-rose-200'
+              : 'bg-rose-50 hover:bg-rose-100'
+          }`}
+        >
+          <div className={`text-2xl font-bold ${position === 'no' ? 'text-white' : 'text-rose-600'}`}>
+            {Math.round(market.noOdds * 100)}%
+          </div>
+          <div className={`text-xs font-semibold ${position === 'no' ? 'text-rose-100' : 'text-rose-600'}`}>
+            No
+          </div>
+        </button>
+      </div>
+
+      <p className="text-xs text-slate-500 mb-4 line-clamp-2 leading-relaxed">
+        {market.description}
+      </p>
 
       {userBalance > 0 ? (
-        <div className="space-y-2">
-          <div className="flex gap-1">
-            <button
-              onClick={() => setPosition('yes')}
-              className={`flex-1 py-1.5 rounded text-xs font-semibold transition ${
-                position === 'yes' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              Yes
-            </button>
-            <button
-              onClick={() => setPosition('no')}
-              className={`flex-1 py-1.5 rounded text-xs font-semibold transition ${
-                position === 'no' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              No
-            </button>
-          </div>
+        <div className="space-y-3">
           <div className="flex gap-2 items-center">
             <input
               type="number"
@@ -169,20 +190,23 @@ function MarketPopup({
               max={userBalance}
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
-              className="flex-1 px-2 py-1 border rounded text-sm"
+              className="flex-1 px-4 py-2.5 bg-slate-100 border-0 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              placeholder="Amount"
             />
             <button
               onClick={handleBet}
               disabled={isLoading || amount <= 0}
-              className="px-3 py-1 bg-blue-500 text-white rounded text-sm font-medium disabled:bg-gray-300"
+              className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-blue-200"
             >
               {isLoading ? '...' : 'Bet'}
             </button>
           </div>
-          <div className="text-xs text-gray-400">Balance: {userBalance} credits</div>
+          <div className="text-xs text-slate-400 font-medium">
+            Balance: <span className="text-blue-500">{userBalance}</span> credits
+          </div>
         </div>
       ) : (
-        <div className="text-xs text-gray-500 text-center py-2">
+        <div className="text-sm text-slate-400 text-center py-3 bg-slate-50 rounded-xl font-medium">
           Login to place bets
         </div>
       )}
