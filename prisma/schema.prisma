@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  privyId   String   @unique
+  balance   Int      @default(100)
+  createdAt DateTime @default(now())
+  bets      Bet[]
+}
+
+model Market {
+  id                 String       @id @default(cuid())
+  title              String
+  description        String
+  imageUrl           String?
+
+  // Geolocation
+  latitude           Float
+  longitude          Float
+  locationName       String
+
+  // Market state
+  status             MarketStatus @default(OPEN)
+  resolutionCriteria String
+  resolvedAt         DateTime?
+  outcome            Boolean?
+
+  // AMM liquidity pool
+  yesShares          Float        @default(100)
+  noShares           Float        @default(100)
+
+  createdAt          DateTime     @default(now())
+  expiresAt          DateTime
+
+  bets               Bet[]
+}
+
+model Bet {
+  id        String   @id @default(cuid())
+  userId    String
+  marketId  String
+  position  Boolean
+  amount    Int
+  shares    Float
+  oddsAtBet Float
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  market    Market   @relation(fields: [marketId], references: [id])
+
+  @@index([userId])
+  @@index([marketId])
+}
+
+enum MarketStatus {
+  OPEN
+  CLOSED
+  RESOLVED
+}
