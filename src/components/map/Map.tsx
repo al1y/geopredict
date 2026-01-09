@@ -47,25 +47,48 @@ export function Map({ markets, selectedMarket, onMarketSelect, userBalance, onBe
             onMarketSelect(market)
           }}
         >
-          <div className="cursor-pointer transition-all duration-200 hover:scale-110">
+          <div className="cursor-pointer transition-all duration-200 hover:scale-105">
             <div className="flex flex-col items-center">
-              <div
-                className={`
-                  w-10 h-10 rounded-2xl flex items-center justify-center
-                  text-white text-xs font-bold shadow-lg
-                  transition-all duration-200
-                  ${selectedMarket?.id === market.id
-                    ? 'bg-gradient-to-br from-blue-400 to-purple-500 scale-110 marker-glow'
-                    : 'bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500'
-                  }
-                `}
-                style={{
-                  boxShadow: selectedMarket?.id === market.id
-                    ? '0 0 30px rgba(96, 165, 250, 0.6), 0 4px 15px rgba(0,0,0,0.3)'
-                    : '0 4px 15px rgba(0,0,0,0.3)',
-                }}
-              >
-                {Math.round(market.yesOdds * 100)}%
+              <div className="relative">
+                {/* Main image container */}
+                <div
+                  className={`
+                    w-12 h-12 rounded-2xl overflow-hidden
+                    transition-all duration-200
+                    ${selectedMarket?.id === market.id ? 'scale-110 ring-2 ring-blue-400 ring-offset-2 ring-offset-transparent' : ''}
+                  `}
+                  style={{
+                    boxShadow: selectedMarket?.id === market.id
+                      ? '0 0 30px rgba(96, 165, 250, 0.6), 0 4px 15px rgba(0,0,0,0.4)'
+                      : '0 4px 15px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  {market.imageUrl ? (
+                    <img
+                      src={market.imageUrl}
+                      alt={market.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold">
+                      {market.locationName?.charAt(0) || '?'}
+                    </div>
+                  )}
+                </div>
+                {/* Percentage badge */}
+                <div
+                  className={`
+                    absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-lg
+                    text-[10px] font-bold text-white
+                    ${market.yesOdds >= 0.5
+                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
+                      : 'bg-gradient-to-r from-rose-500 to-rose-600'
+                    }
+                  `}
+                  style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
+                >
+                  {Math.round(market.yesOdds * 100)}%
+                </div>
               </div>
               {viewState.zoom > 3.5 && (
                 <div className="mt-2 px-3 py-1.5 glass-dark rounded-lg text-xs text-white/90 max-w-[140px] truncate font-medium">
